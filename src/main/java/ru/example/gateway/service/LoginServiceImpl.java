@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import ru.example.gateway.JwtTokenProvider;
 import ru.example.gateway.dao.JwtTokenRepository;
 import ru.example.gateway.dao.UserRepository;
-import ru.example.gateway.model.JwtToken;
+import ru.example.gateway.model.Token;
 import ru.example.gateway.model.Role;
 import ru.example.gateway.model.User;
 import ru.example.gateway.util.CustomException;
@@ -37,14 +37,11 @@ public class LoginServiceImpl implements LoginService
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username,
                     password));
-            User user = userRepository.findByEmail(username);
-            if (user == null || user.getRole() == null || user.getRole().isEmpty()) {
-                throw new CustomException("Invalid username or password.", HttpStatus.UNAUTHORIZED);
-            }
+            User user = userRepository.findByName(username);
             //NOTE: normally we dont need to add "ROLE_" prefix. Spring does automatically for us.
             //Since we are using custom token using JWT we should add ROLE_ prefix
-            return jwtTokenProvider.createToken(username, user.getRole().stream()
-                    .map((Role role)-> "ROLE_"+role.getRole()).collect(Collectors.toList()));
+            return jwtTokenProvider.createToken(username, user.getRoles().stream()
+                    .map(Role::getAuthority).collect(Collectors.toList()));
 
         } catch (AuthenticationException e) {
             throw new CustomException("Invalid username or password.", HttpStatus.UNAUTHORIZED);
@@ -59,7 +56,7 @@ public class LoginServiceImpl implements LoginService
 
     @Override
     public boolean logout(String token) {
-        jwtTokenRepository.delete(new JwtToken(token));
+        jwtTokenRepository.delete(new Token(token));
         return true;
     }
 

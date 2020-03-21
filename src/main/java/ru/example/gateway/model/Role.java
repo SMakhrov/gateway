@@ -1,9 +1,13 @@
 package ru.example.gateway.model;
 
-import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
 
-@Data
-public class Role {
-    private Integer id;
-    private String role;
+public enum Role implements GrantedAuthority {
+    ROLE_USER,
+    ROLE_ADMIN;
+
+    @Override
+    public String getAuthority() {
+        return name();
+    }
 }

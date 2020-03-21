@@ -3,14 +3,13 @@ package ru.example.gateway.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import javax.persistence.*;
 
-@Document
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class JwtToken {
+@Entity
+public class Token {
     @Id
     private String token;
 }
