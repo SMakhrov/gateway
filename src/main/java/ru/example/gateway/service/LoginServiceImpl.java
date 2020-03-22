@@ -56,19 +56,6 @@ public class LoginServiceImpl implements LoginService
 
     @Override
     public Boolean isValidToken(String token) {
-        try {
-            jwtTokenProvider.validateToken(token);
-        }
-        catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public String createNewToken(String token) {
-        String username = jwtTokenProvider.getUsername(token);
-        List<String> roleList = jwtTokenProvider.getRoleList(token);
-        return jwtTokenProvider.createToken(username,roleList);
+        return jwtTokenProvider.validateToken(token);
     }
 }

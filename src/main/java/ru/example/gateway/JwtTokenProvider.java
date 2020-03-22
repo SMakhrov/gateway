@@ -72,17 +72,23 @@ public class JwtTokenProvider {
         return null;
     }
 
-    public void validateToken(String token) throws JwtException, IllegalArgumentException {
+    public boolean validateToken(String token) throws JwtException, IllegalArgumentException {
+        try {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
-    }
+            return true;
+        } catch (SignatureException e) {
+            log.error("Invalid JWT signature: {}", e.getMessage());
+        } catch (MalformedJwtException e) {
+            log.error("Invalid JWT token: {}", e.getMessage());
+        } catch (ExpiredJwtException e) {
+            log.error("JWT token is expired: {}", e.getMessage());
+        } catch (UnsupportedJwtException e) {
+            log.error("JWT token is unsupported: {}", e.getMessage());
+        } catch (IllegalArgumentException e) {
+            log.error("JWT claims string is empty: {}", e.getMessage());
+        }
 
-    public boolean isTokenPresentInDB (String token) {
-        return jwtTokenRepository.findById(token).isPresent();
-    }
-
-    public List<String> getRoleList(String token) {
-        return (List<String>) Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).
-                getBody().get(AUTH);
+        return false;
     }
 
     public String getUsername(String token) {

@@ -29,22 +29,16 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     @Override
     public void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain)
             throws IOException, ServletException {
-        String token = jwtTokenProvider.resolveToken(req);
         try {
-            jwtTokenProvider.validateToken(token);
-            Authentication auth = jwtTokenProvider.getAuthentication(token);
-            //setting auth in the context.
-            SecurityContextHolder.getContext().setAuthentication(auth);
-        } catch (SignatureException e) {
-            log.error("Invalid JWT signature: {}", e.getMessage());
-        } catch (MalformedJwtException e) {
-            log.error("Invalid JWT token: {}", e.getMessage());
-        } catch (ExpiredJwtException e) {
-            log.error("JWT token is expired: {}", e.getMessage());
-        } catch (UnsupportedJwtException e) {
-            log.error("JWT token is unsupported: {}", e.getMessage());
-        } catch (IllegalArgumentException e) {
-            log.error("JWT claims string is empty: {}", e.getMessage());
+            String token = jwtTokenProvider.resolveToken(req);
+            if (jwtTokenProvider.validateToken(token)) {
+                Authentication auth = jwtTokenProvider.getAuthentication(token);
+                //setting auth in the context.
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            }
+        }
+        catch (Exception e) {
+            log.error("Could not set user authentication in security context", e);
         }
         filterChain.doFilter(req, res);
     }
