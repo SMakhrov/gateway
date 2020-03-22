@@ -1,20 +1,15 @@
 package ru.example.gateway.service;
 
-import io.jsonwebtoken.JwtException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.example.gateway.JwtTokenProvider;
-import ru.example.gateway.dao.JwtTokenRepository;
 import ru.example.gateway.dao.UserRepository;
-import ru.example.gateway.model.Token;
 import ru.example.gateway.model.Role;
 import ru.example.gateway.model.User;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,8 +23,6 @@ public class LoginServiceImpl implements LoginService
     private AuthenticationManager authenticationManager;
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private JwtTokenRepository jwtTokenRepository;
 
     @Override
     public String login(String username, String password) {
@@ -46,12 +39,6 @@ public class LoginServiceImpl implements LoginService
     public User saveUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()) );
         return userRepository.save(user);
-    }
-
-    @Override
-    public boolean logout(String token) {
-        jwtTokenRepository.delete(new Token(token));
-        return true;
     }
 
     @Override

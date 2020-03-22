@@ -7,7 +7,5 @@ public interface LoginService {
 
     User saveUser(User user);
 
-    boolean logout(String token);
-
     Boolean isValidToken(String token);
 }

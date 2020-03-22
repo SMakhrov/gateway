@@ -10,8 +10,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
-import ru.example.gateway.dao.JwtTokenRepository;
-import ru.example.gateway.model.Token;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -30,9 +28,6 @@ public class JwtTokenProvider {
     @Value("${jwt.expirationMs}")
     private long expirationMs;
 
-    @Autowired
-    private JwtTokenRepository jwtTokenRepository;
-
     @Qualifier("userService")
     @Autowired
     private UserDetailsService userDetailsService;
@@ -50,14 +45,12 @@ public class JwtTokenProvider {
         Date now = new Date();
         Date validity = new Date(now.getTime() + expirationMs);
 
-        String token =  Jwts.builder()
+        return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(validity)
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
-        jwtTokenRepository.save(new Token(token));
-        return token;
     }
 
     public String resolveToken(HttpServletRequest req) {
