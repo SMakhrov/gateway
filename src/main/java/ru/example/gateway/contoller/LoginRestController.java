@@ -18,13 +18,13 @@ import java.util.List;
 public class LoginRestController {
 
     @Autowired
-    private LoginService LoginService;
+    private LoginService loginService;
 
     @CrossOrigin("*")
     @PostMapping("/signin")
     @ResponseBody
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest loginRequest) {
-        String token = LoginService.login(loginRequest.getUsername(),loginRequest.getPassword());
+        String token = loginService.login(loginRequest.getUsername(),loginRequest.getPassword());
         HttpHeaders headers = new HttpHeaders();
         List<String> headerlist = new ArrayList<>();
         List<String> exposeList = new ArrayList<>();
@@ -43,7 +43,7 @@ public class LoginRestController {
     @ResponseBody
     public ResponseEntity<AuthResponse> logout (@RequestHeader(value="Authorization") String token) {
         HttpHeaders headers = new HttpHeaders();
-        if (LoginService.logout(token)) {
+        if (loginService.logout(token)) {
             headers.remove("Authorization");
             return new ResponseEntity<>(new AuthResponse("logged out"), headers, HttpStatus.CREATED);
         }
@@ -59,7 +59,7 @@ public class LoginRestController {
     @PostMapping("/valid/token")
     @ResponseBody
     public Boolean isValidToken (@RequestHeader(value="Authorization") String token) {
-        return true;
+        return loginService.isValidToken(token);
     }
 
 
@@ -67,7 +67,7 @@ public class LoginRestController {
     @CrossOrigin("*")
     @ResponseBody
     public ResponseEntity<AuthResponse> createNewToken (@RequestHeader(value="Authorization") String token) {
-        String newToken = LoginService.createNewToken(token);
+        String newToken = loginService.createNewToken(token);
         HttpHeaders headers = new HttpHeaders();
         List<String> headerList = new ArrayList<>();
         List<String> exposeList = new ArrayList<>();

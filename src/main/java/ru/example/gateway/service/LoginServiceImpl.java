@@ -1,5 +1,6 @@
 package ru.example.gateway.service;
 
+import io.jsonwebtoken.JwtException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,8 +13,6 @@ import ru.example.gateway.dao.UserRepository;
 import ru.example.gateway.model.Token;
 import ru.example.gateway.model.Role;
 import ru.example.gateway.model.User;
-import ru.example.gateway.util.CustomException;
-import org.springframework.security.core.AuthenticationException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,18 +33,13 @@ public class LoginServiceImpl implements LoginService
 
     @Override
     public String login(String username, String password) {
-        try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username,
-                    password));
-            User user = userRepository.findByName(username);
-            //NOTE: normally we dont need to add "ROLE_" prefix. Spring does automatically for us.
-            //Since we are using custom token using JWT we should add ROLE_ prefix
-            return jwtTokenProvider.createToken(username, user.getRoles().stream()
-                    .map(Role::getAuthority).collect(Collectors.toList()));
-
-        } catch (AuthenticationException e) {
-            throw new CustomException("Invalid username or password.", HttpStatus.UNAUTHORIZED);
-        }
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username,
+                password));
+        User user = userRepository.findByName(username);
+        //NOTE: normally we dont need to add "ROLE_" prefix. Spring does automatically for us.
+        //Since we are using custom token using JWT we should add ROLE_ prefix
+        return jwtTokenProvider.createToken(username, user.getRoles().stream()
+                .map(Role::getAuthority).collect(Collectors.toList()));
     }
 
     @Override
@@ -62,7 +56,13 @@ public class LoginServiceImpl implements LoginService
 
     @Override
     public Boolean isValidToken(String token) {
-        return jwtTokenProvider.validateToken(token);
+        try {
+            jwtTokenProvider.validateToken(token);
+        }
+        catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+        return true;
     }
 
     @Override
