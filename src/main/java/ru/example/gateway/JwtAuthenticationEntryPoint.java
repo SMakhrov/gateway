@@ -1,5 +1,6 @@
 package ru.example.gateway;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -10,13 +11,15 @@ import java.io.IOException;
 import java.io.Serializable;
 
 @Component
+@Slf4j
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint, Serializable {
     private static final long serialVersionUID = 7441949086490197667L;
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
-                         AuthenticationException authException) throws IOException {
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                         AuthenticationException e) throws IOException {
+        log.error("Responding with unauthorized error. Message - {}", e.getMessage());
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
 
     }
 
